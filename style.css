@@ -1,0 +1,111 @@
+/* START  navigation module CSS here   */
+.navbar{
+    
+    background-image:url("https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.shutterstock.com%2Fsearch%2Fice%2Bbackground&psig=AOvVaw3xW3PsDMr0TZ2Sq0Xjkevw&ust=1639985135640000&source=images&cd=vfe&ved=0CAsQjRxqFwoTCOiVy-6q7_QCFQAAAAAdAAAAABAI");
+    margin-bottom: 20px;
+    color: black;
+}
+.navbar-brand img{
+height: 2rem;
+margin-right:10px;
+position:relative;
+bottom:5px;
+
+
+}
+.navbar li{
+margin-right:10px;
+font-size: 20px;
+
+}
+/* END  navigation module CSS here   */
+
+/* START CAROUSEL MODULES CSS */
+#carousel img
+{
+    height:550px;
+          
+}
+/* END CAROUSEL MODULES CSS*/
+
+/* START THREE PHOTO MODULES CSS*/
+
+#threePhotoSection img
+{
+    width:420px;
+    height:300px;
+    border-radius:50%;
+    masrgin:10px;
+}
+#threePhotoSection img:hover
+{
+    width:425px;
+    height:300px;
+    border-radius:20%;
+    opacity:0.7;
+}
+#threePhotoSection h3
+{
+margin-top:50px;
+margin-bottom:50px;
+}
+#threePhotoSection
+{
+    margin-bottom:30px;
+}
+
+/* END OF THREE PHOTO MODULES CSS*/
+
+/* START OF PARAGRAPH MODULES CSS*/
+/* END OF PARAGRAPH MODULES CSS*/
+#moreAboutUs h3 
+{
+    padding:25px;
+    padding-bottom:40px;
+}
+
+#moreAboutUs  blockquote
+{
+    padding:55px;
+    
+}
+#moreAboutUs
+{
+    background-image: url("images/spider.png");
+      background-width: 100%;
+    color:white;
+}
+
+/* START OF TABLE MODULE CSS*/
+/* END OF TABLE MODULE CSS*/
+
+/* START OF FORM MODULES CSS*/
+.contact{
+     background-image: url("images/joker.jpg");
+    }
+/* END OF FORM MODULES CSS*/
+
+/* START OF BUTTON CSS*/
+.btn{
+    margin-left:auto;
+    margin-right:auto;display:block;
+    margin-bottom:50px;
+   margin-top:50px;
+}
+/* END OF BUTTON CSS*/
+
+ /* START OF FOOTER CSS*/
+ footer{
+    background-image: url("images/spider.png");
+    color: white;
+    padding: 2rem 0 2rem;
+    margin-top: 1rem;
+}
+footer img{
+    height: 3rem;
+    margin: 1.5rem 0;
+}
+footer a{
+    color:white;
+}
+ /* END OF FOOTER CSS*/

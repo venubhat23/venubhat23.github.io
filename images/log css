@@ -1,0 +1,295 @@
+.normal .text {
+
+}
+
+
+h2 dark 
+
+
+
+
+Loganathan Guna10:36 PM
+.normal {
+	.header,.conatiner, main-block{
+		background-color: #fff;
+	}		
+	
+}
+.dark{
+	.header,.conatiner,.main-block,.text{
+		background-color: #000;
+	}	
+}
+
+isred = dark ? dark: normal
+
+<section id="main">
+<div class={isred}>
+
+<div class="header"></div>
+<div class="conatiner"></div>
+<div class="main-block"></div>
+
+
+</div>
+</section>
+=
+
+
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import MsgComposerInv from './MsgComposer';
+import MsgListItemInv from './MsgListItem';
+import ChannelInfoInv from './ChannelInfo';
+import ChannelsInv from './Channels';
+import classnames from 'classnames';
+import * as chatActions from '../../../../../features/chats/actions/ChatActions';
+import ExitChatInv from './Modals/ExitChat';
+import Loader from 'react-loader-advanced';
+import timeStampElementInv from '../../../../../commons/libs/TimeStampElement';
+
+const spinner = <i className='material-icons spinner-icon'>autorenew</i>;
+
+const allowSubscribeCache = {};
+
+class Chat extends Component {
+
+  constructor(props, context) {
+    super(props, context);
+    this.changeActiveChannel = this.changeActiveChannel.bind(this);
+    this.showChannelInfo = this.showChannelInfo.bind(this);
+    this.allowSubscribe = this.allowSubscribe.bind(this);
+    this.exitChannel = this.exitChannel.bind(this);
+    this.deleteChannel = this.deleteChannel.bind(this);
+    this.displayName = this.displayName.bind(this);
+    this.getTime = this.getTime.bind(this);
+    this.state = {
+      showInfo: false,
+      gettingPendingConnectCount: false
+    };
+  }
+
+  allowSubscribe(channel) {
+    return (channel.active ? channel.active_member : false);
+  };
+
+  componentWillReceiveProps(nextProps) {
+    const { channels, activeChannel, user, dispatch } = nextProps;
+    for (let j = 0; j < channels.length; j++) {
+      let channel = channels[j];
+      if (allowSubscribeCache[channel.channel_name] === undefined) {
+        allowSubscribeCache[channel.channel_name] = this.allowSubscribe(channel);
+      }
+    }
+    if (!!user.id && !this.state.gettingPendingConnectCount) {
+      this.setState({ gettingPendingConnectCount: true });
+      dispatch(chatActions.getPendingConnects());
+    }
+  }
+
+  componentDidUpdate() {
+    const messageList = this.refs.messageList;
+    if (messageList) {
+      messageList.scrollTop = messageList.scrollHeight;
+    }
+  }
+
+  componentWillMount() {
+    const { channels, activeChannel } = this.props;
+    if (Object.keys(activeChannel).length === 0 && channels.length > 0) {
+      this.changeActiveChannel(channels[0]);
+    }
+  }
+
+  changeActiveChannel(channel) {
+    if (channel.channel_name) {
+      const { activeChannel, dispatch, user, history } = this.props;
+      // debugger;
+      // this.context.router.history.push(`/webchats/${channel.id}`);
+      history.push(`/messages/${channel.id}`);
+      if (channel.channel_name !== activeChannel.channel_name) {
+        dispatch(chatActions.changeChannel(channel));
+        dispatch(chatActions.clearUnreadCount(user.id, channel.id));
+        dispatch(chatActions.fetchParticipantDetails(channel));
+        dispatch(chatActions.fetchMsgs(channel, user));
+      }
+    }
+  }
+
+  showChannelInfo() {
+    this.setState({ 'showInfo': !this.state.showInfo });
+  }
+
+  exitChannel() {
+    document.getElementById("leave_room_btn").disabled = true;
+    const { activeChannel, dispatch, user } = this.props;
+    dispatch(chatActions.exitChannelAction(activeChannel, user));
+  }
+
+  deleteChannel() {
+    const { activeChannel, dispatch, user } = this.props;
+    dispatch(chatActions.deleteChannelAction(activeChannel, user));
+  }
+
+  displayName(channel) {
+    return channel.display_name;
+  }
+
+  getTime(createdDate) {
+    return timeStampElementInv(createdDate);
+  }
+
+  loadLikedStartupsList() {
+    window.location.href = '/my/interested_startups';
+  }
+
+  render() {
+          console.log('WEBCHATS',this.props)
+
+    const { msgs, channels, activeChannel, dispatch, user, channelLoader, msgLoader ,theme} = this.props;
+    debugger;
+    const isRed = theme.name == "Dark"
+
+    const filteredMsgs = msgs.filter(msg => {
+      return (msg.channel_id === activeChannel.id);
+    });
+    var infoVariant;
+    if (this.state.showInfo) {
+      infoVariant = 'on';
+    } else {
+      infoVariant = 'off';
+    }
+    var showExitButton = allowSubscribeCache[activeChannel.channel_name];
+    if (user.extras) {
+      var userAdmin = (user.extras.roles.angel_investor || user.extras.roles.institution_investor)
+    }
+    let pendingConnectsCount = this.props.pendingConnects.pendingConnectsCount;
+    return (
+      <section className='body normal'>
+        <h2 className='sr-only'>Chatroom</h2>
+        <div className='feature-chat'>
+          {channelLoader &&
+            <div className="loader-continer">
+              <Loader show={true} message={spinner}></Loader>
+            </div>
+          }
+          {!channelLoader && (user.id !== undefined) &&
+            <div className='card-group'>
+              <aside className='card col-5 col-sm-7 chatroom-list' style={{ height: '90vh' }}>
+                <h3 className='sr-only'>Chatroom List</h3>
+
+                <header className='card-header title-box' style={{ backgroundColor: isRed ? 'rgb(32,33,36)' : '#fff' }}>
+                  Messages
+                </header>
+                {pendingConnectsCount > 0 &&
+                  <div className="pending-connects-container" onClick={this.loadLikedStartupsList}>
+                    <div className="pull-right arrow-container">
+                      <strong><a href="/my/interested_startups">&gt;</a></strong>
+                    </div>
+                    <div>
+                      <strong>Connect with startups you are interested in</strong>
+                      <br /><br />
+                      {pendingConnectsCount > 1 ? `${pendingConnectsCount} Pending Startups` : `${pendingConnectsCount} Pending Startup`}
+                    </div>
+                  </div>
+                }
+                <ChannelsInv user={user} onChannelChange={this.changeActiveChannel} channels={channels} activeChannel={activeChannel} displayName={this.displayName} getTime={this.getTime} {...this.props} />
+              </aside>
+              {activeChannel && activeChannel.channel_name &&
+                <section className='card col-19 col-sm-17 chat-window'>
+                  <h3 className='sr-only'>Chat Window</h3>
+                  <header className='card-header channel-info-header'>
+                    <div className='media'>
+                      <div className="d-flex img-container">
+                        <img src={activeChannel.display_picture_url} alt='Image'
+                          className='profile-image align-self-center' />
+                      </div>
+                      <div className='media-body channel-info-btn' onClick={this.showChannelInfo}>
+                        <h5 className='text-truncate current-channel channel-info-btn mb-2 mt-1'>{this.displayName(activeChannel)}</h5>
+                        <h6 className='text-truncate text-muted channel-info-btn'>
+                          {activeChannel.participants && activeChannel.participants.map((part) => {
+                            if (part.user_id === user.id)
+                              return 'You';
+                            else
+                              return part.name;
+                          }).join(', ')}
+                        </h6>
+                      </div>
+                      <div className='dropdown d-flex ml-2 mt-2'>
+                        <button className='btn btn-link' data-toggle='dropdown' type='button' id='channelDropdown' aria-haspopup='true' aria-expanded='false'>
+                          <i className='material-icons'>more_vert</i>
+                        </button>
+                        <div className='dropdown-menu dropdown-menu-left' aria-labelledby='channelDropdown'>
+                          <button className='dropdown-item channel-info-btn' onClick={this.showChannelInfo}>Channel Info</button>
+                          {showExitButton &&
+                            <button type='button' className='dropdown-item' data-toggle='modal' data-target='#exitChat'>Exit Channel</button>
+                          }
+                          {!activeChannel.active_member && userAdmin &&
+                            <a className='dropdown-item' href='#' onClick={this.deleteChannel}>Delete Channel</a>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                    <ExitChatInv exitChannel={this.exitChannel} />
+                  </header>
+                  <div className='card-body' ref='messageList'>
+                    {msgLoader &&
+                      <Loader show={msgLoader} message={spinner}></Loader>
+                    }
+                    {(!msgLoader && filteredMsgs.length === 0) &&
+                      <div className="no-msg-div">
+                        <span>No message yet.<br /> Start a conversation now.<br /> Say hello!</span>
+                      </div>
+                    }
+                    {(!msgLoader && filteredMsgs.length > 0) &&
+                      <ul className='list-unstyled msg-list'>
+                        {filteredMsgs.map(msg =>
+                          <MsgListItemInv msg={msg} key={msg.guid} user={user} getTime={this.getTime} />
+                        )}
+                      </ul>
+                    }
+                  </div>
+                  {!msgLoader &&
+                    <MsgComposerInv activeChannel={activeChannel} user={user} dispatch={dispatch} allowSubscribeCache={allowSubscribeCache} />
+                  }
+                  <ChannelInfoInv infoVariant={infoVariant} activeChannel={activeChannel} dispatch={dispatch} allowSubscribeCache={allowSubscribeCache} exitChannel={this.exitChannel} showChannelInfo={this.showChannelInfo} />
+                </section>
+              }
+              {(!activeChannel || !activeChannel.channel_name) &&
+                <section className='card col-18 col-sm-17 chat-window'>
+                  <h3 className='sr-only'>Chat Window</h3>
+                  <div className="card-body">
+                    <div className="media" style={{ margin: '20px' }}>
+                      <img className="d-flex mr-4" style={{ height: '50px', width: '50px' }}
+                        src="https://s3-ap-southeast-1.amazonaws.com/letsventure/public/icons/chat.png" />
+                      <div className="media-body">
+                        <h3 className="mt-0">Welcome to Chats</h3>
+                        Talk to Investors & Startups on web & mobile safely & securely
+                        </div>
+                    </div>
+                  </div>
+                </section>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    )
+  }
+}
+Chat.contextTypes = {
+  router: PropTypes.object.isRequired
+};
+
+Chat.propTypes = {
+  msgs: PropTypes.array.isRequired,
+  channels: PropTypes.array.isRequired,
+  user: PropTypes.object.isRequired,
+  dispatch: PropTypes.func.isRequired,
+  activeChannel: PropTypes.object.isRequired,
+  channelLoader: PropTypes.bool.isRequired,
+  msgLoader: PropTypes.bool.isRequired
+};
+
+export default Chat;
+a
